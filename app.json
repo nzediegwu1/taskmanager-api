@@ -1,0 +1,24 @@
+{
+  "name": "simple-todo",
+  "description": "",
+  "scripts": {
+  },
+  "env": {
+    "undefined": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
