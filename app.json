@@ -1,10 +1,9 @@
 {
   "name": "simple-todo",
   "description": "",
-  "scripts": {
-  },
+  "scripts": {},
   "env": {
-    "undefined": {
+    "JWT_SECRET_KEY": {
       "required": true
     }
   },
@@ -13,9 +12,7 @@
       "quantity": 1
     }
   },
-  "addons": [
-
-  ],
+  "addons": [],
   "buildpacks": [
     {
       "url": "heroku/python"
