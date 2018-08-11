@@ -1,11 +1,11 @@
 users = [{
     'id': 1,
     'name': 'Anaeze Nsoffor',
-    'username': 'nzediegwu1',
+    'email': 'nzediegwu1@gmail.com',
     'password': 'password1'
 }, {
     'id': 2,
     'name': 'Eberechi Daniel',
-    'username': 'eberechi',
+    'email': 'eberechi@gmail.com',
     'password': 'password1'
 }]
