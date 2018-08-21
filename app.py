@@ -4,8 +4,7 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from flask_restful import Resource, Api
-from views.users import Login, Signup
-
+from views.users import LoginResource, UserResource
 
 load_dotenv()
 app = Flask(__name__)
@@ -21,8 +20,8 @@ class HelloWorld(Resource):
 
 
 api.add_resource(HelloWorld, '/')
-api.add_resource(Signup, '/users')
-api.add_resource(Login, '/login')
+api.add_resource(UserResource, '/users')
+api.add_resource(LoginResource, '/login')
 
 if __name__ == '__main__':
     # app.debug = True

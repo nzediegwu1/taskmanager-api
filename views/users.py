@@ -3,68 +3,59 @@ from flask_restful import Resource, request
 
 from models.users import users
 from utilities.response import Response
-from validator.user_validator import Validator
+from utilities.model_schemas.user_schema import UserSchema
+
+response = Response()
 
 
-class Login(Resource):
-    res = Response()
-    val = Validator()
-
+class LoginResource(Resource):
     def login(self, data):
         visitor = None
         for user in users:
             if user['email'] == data['email']:
-                visitor = {**user}
+                visitor = user
                 break
         if not visitor:
-            return self.res.error_resp('User does not exist', 403)
+            return response.error_resp('User does not exist', 403)
         elif data['password'] != visitor['password']:
-            return self.res.error_resp('Invalid login details', 401)
-        del visitor['password']
-        return {
-            'status': 'success',
-            'data': visitor,
-            'message': 'Login successful',
-            'token': create_access_token(visitor['id'])
-        }
+            return response.error_resp('Invalid login details', 401)
+        schema = UserSchema(exclude=['password'])
+        user, _ = schema.dump(visitor)
+        res, code = response.succcess_resp('Login successful', user, 200)
+        res['token'] = create_access_token(user['id'])
+        return res, code
 
     def post(self):
-        req = request.form
-        data = {'email': req.get('email'), 'password': req.get('password')}
-        login = self.val.validate_login(data) or self.login(data)
-        return login
+        json_request = request.get_json(force=True)
+        schema = UserSchema(only=['email', 'password'])
+        data, errors = schema.load(json_request)
+        if errors:
+            return response.error_resp(errors, 400)
+        return self.login(data)
 
 
-class Signup(Resource):
-    res = Response()
-    val = Validator()
-
+class UserResource(Resource):
     def sign_up(self, data):
         for user in users:
             if user['email'] == data['email']:
-                return self.res.error_resp('User already exists', 409)
+                return response.error_resp('User already exists', 409)
         data['id'] = len(users) + 1
-        del data['re_password']
         users.append(data)
-        new_user = {**data}
-        del new_user['password']
-        return {
-            'status': 'success',
-            'data': new_user,
-            'message': 'Signup successful',
-            'token': create_access_token(new_user['id'])
-        }, 201
+        schema = UserSchema(exclude=['password'])
+        new_user, _ = schema.dump(data)
+        res, code = response.succcess_resp('Signup successful', new_user, 201)
+        res['token'] = create_access_token(new_user['id'])
+        return res, code
 
     def post(self):
-        req = request.form
-        data = {
-            'name': req.get('name'),
-            'email': req.get('email'),
-            'password': req.get('password'),
-            're_password': req.get('re_password')
-        }
-        register = self.val.validate_signup(data) or self.sign_up(data)
-        return register
+        json_data = request.get_json(force=True)
+        schema = UserSchema()
+        data, errors = schema.load(json_data)
+        if errors:
+            return response.error_resp(errors, 400)
+        return self.sign_up(data)
 
     def get(self):
-        return {'status': 'success', 'data': users, 'message': 'User list'}
+        schema = UserSchema(exclude=['password'], many=True)
+        json_data, _ = schema.dump(users)
+        return {'status': 'success', 'data': json_data, 'message': 'User list'}
