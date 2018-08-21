@@ -9,10 +9,10 @@ gunicorn = "*"
 flask-jwt-extended = "*"
 python-dotenv = "*"
 flask-restful = "*"
+marshmallow = "*"
 
 [dev-packages]
 pylint = "*"
-"pep8" = "*"
 yapf = "*"
 rope = "*"
 
