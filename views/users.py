@@ -58,4 +58,4 @@ class UserResource(Resource):
     def get(self):
         schema = UserSchema(exclude=['password'], many=True)
         json_data, _ = schema.dump(users)
-        return {'status': 'success', 'data': json_data, 'message': 'User list'}
+        return response.succcess_resp('User list', json_data, 200)
