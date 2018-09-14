@@ -1,6 +1,8 @@
 class Response():
-    def error_resp(self, message, code):
+    def error(self, message, code=400):
         return {'status': 'error', 'message': message}, code
 
-    def succcess_resp(self, message, data, code):
-        return {'status': 'success', 'data': data, 'message': message}, code
+    def success(self, message, data=None, code=200):
+        response = {'status': 'success', 'data': data, 'message': message}
+        data = data or response.pop('data')
+        return response, code

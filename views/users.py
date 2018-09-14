@@ -16,12 +16,12 @@ class LoginResource(Resource):
                 visitor = user
                 break
         if not visitor:
-            return response.error_resp('User does not exist', 403)
+            return response.error('User not found', 404)
         elif data['password'] != visitor['password']:
-            return response.error_resp('Invalid login details', 401)
+            return response.error('Invalid login details', 401)
         schema = UserSchema(exclude=['password'])
         user, _ = schema.dump(visitor)
-        res, code = response.succcess_resp('Login successful', user, 200)
+        res, code = response.success('Login successful', user)
         res['token'] = create_access_token(user['id'])
         return res, code
 
@@ -30,7 +30,7 @@ class LoginResource(Resource):
         schema = UserSchema(only=['email', 'password'])
         data, errors = schema.load(json_request)
         if errors:
-            return response.error_resp(errors, 400)
+            return response.error(errors)
         return self.login(data)
 
 
@@ -38,12 +38,12 @@ class UserResource(Resource):
     def sign_up(self, data):
         for user in users:
             if user['email'] == data['email']:
-                return response.error_resp('User already exists', 409)
+                return response.error('User already exists', 409)
         data['id'] = len(users) + 1
         users.append(data)
         schema = UserSchema(exclude=['password'])
         new_user, _ = schema.dump(data)
-        res, code = response.succcess_resp('Signup successful', new_user, 201)
+        res, code = response.success('Signup successful', new_user, 201)
         res['token'] = create_access_token(new_user['id'])
         return res, code
 
@@ -52,10 +52,10 @@ class UserResource(Resource):
         schema = UserSchema()
         data, errors = schema.load(json_data)
         if errors:
-            return response.error_resp(errors, 400)
+            return response.error(errors)
         return self.sign_up(data)
 
     def get(self):
         schema = UserSchema(exclude=['password'], many=True)
         json_data, _ = schema.dump(users)
-        return response.succcess_resp('User list', json_data, 200)
+        return response.success('User list', json_data)

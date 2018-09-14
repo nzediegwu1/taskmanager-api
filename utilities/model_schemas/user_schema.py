@@ -1,18 +1,10 @@
-from marshmallow import fields, Schema, validates, ValidationError
+from marshmallow import fields, Schema, validate, ValidationError
+
+from ..validators.field_validators import validate_name, validate_password
 
 
 class UserSchema(Schema):
     id = fields.Integer()
-    name = fields.Str(required=True)
+    name = fields.Str(required=True, validate=validate_name)
     email = fields.Email(required=True)
-    password = fields.Str(required=True)
-
-    @validates('password')
-    def validate_password(self, password):
-        if len(password) < 6:
-            raise ValidationError('Password less than 6 chars')
-
-    @validates('name')
-    def validate_name(self, name):
-        if not name.replace(' ', '').isalpha():
-            raise ValidationError('Name must be all alpabets')
+    password = fields.Str(required=True, validate=validate_password)
