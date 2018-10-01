@@ -1,8 +1,17 @@
-class Response():
-    def error(self, message, code=400):
-        return {'status': 'error', 'message': message}, code
+"""Module for parsing custom responses"""
 
-    def success(self, message, data=None, code=200):
-        response = {'status': 'success', 'data': data, 'message': message}
-        data = data or response.pop('data')
-        return response, code
+
+def success(message, data=None, code=200):
+    """
+    Return custom reusable success message
+
+    Parameters:
+        message(string): message to return to the user
+        data(dict): response data
+        code(number): status code of the response
+    Returns:
+        response(tuple): custom success REST response
+    """
+    response = {'status': 'success', 'data': data, 'message': message}
+    data = data or response.pop('data')
+    return response, code
