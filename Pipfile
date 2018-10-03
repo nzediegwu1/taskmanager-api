@@ -10,6 +10,8 @@ flask-jwt-extended = "*"
 python-dotenv = "*"
 flask-restful = "*"
 marshmallow = "*"
+flask-sqlalchemy = "*"
+"psycopg2" = "*"
 
 [dev-packages]
 pylint = "*"
