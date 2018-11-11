@@ -11,7 +11,9 @@ python-dotenv = "*"
 flask-restful = "*"
 marshmallow = "*"
 flask-sqlalchemy = "*"
-"psycopg2" = "*"
+psycopg2 = "*"
+flask-script = "*"
+flask-migrate = "*"
 
 [dev-packages]
 pylint = "*"
