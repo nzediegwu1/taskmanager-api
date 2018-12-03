@@ -1,41 +1,30 @@
 """Module for handling application setup"""
-import os
+from os import getenv
 
 from flask_migrate import Migrate, upgrade
-from flask import Flask, Blueprint, jsonify
+from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from flask_restful import Api
 
-from index import Index
-from views.users import LoginResource, UserResource
+from src.views.index import Index
+from src.views.users import LoginResource, UserResource
 
-from models.database import db
-from config import configure_app
-from utilities.exceptions.ValidationError import (ValidationError,
-                                                  error_blueprint)
+from src.models.database import db
+from config import config
+from src.utilities.exceptions.ValidationError import (ValidationError,
+                                                      error_blueprint)
 
-BASE_URL = '/api/v1'
 load_dotenv()
-app = Flask(__name__)
-api = Api(error_blueprint)
-
-# @error_blueprint.app_errorhandler(ValidationError)
-# def handle_exception(error):
-#     """Error handler called when a ValidationError Exception is raised"""
-
-#     response = error.to_dict()
-#     return jsonify(response), error.status_code
-
-# app.register_blueprint(error_blueprint)  # initialize error handler
-
-# handle_exceptions = app.handle_exception
-# handle_user_exceptions = app.handle_user_exception
-# app.handle_exception = handle_exceptions
-# app.handle_user_exception = handle_user_exceptions
+BASE_URL = '/api/v1'
+config_name = getenv('FLASK_ENV') or 'production'
 
 
-@app.errorhandler(ValidationError)
+def initialize_errorhandlers(application):
+    ''' Initialize error handlers '''
+    application.register_blueprint(error_blueprint)
+
+
 @error_blueprint.app_errorhandler(ValidationError)
 def handle_exception(error):
     """Error handler called when a ValidationError Exception is raised"""
@@ -44,18 +33,29 @@ def handle_exception(error):
     return jsonify(response), error.status_code
 
 
-app.register_blueprint(error_blueprint)  # initialize error handler
+def create_app(config=config[config_name]):
+    """Return app object given config object."""
+    app = Flask(__name__)
 
-jwt = JWTManager(app)
+    app.config.from_object(config)
 
-migrate = Migrate(app, db)
+    jwt = JWTManager(app)
+
+    # bind app to db
+    db.init_app(app)
+
+    # initialize error handlers
+    initialize_errorhandlers(app)
+
+    # initialize migration scripts
+    migrate = Migrate(app, db)
+
+    return app
+
+
+app = create_app()
+api = Api(app)
 
 api.add_resource(Index, '/')
 api.add_resource(UserResource, f'{BASE_URL}/users')
 api.add_resource(LoginResource, f'{BASE_URL}/login')
-
-configure_app(app)  # setup environment
-db.init_app(app)  # connect sqlAlchemy to database
-
-if __name__ == '__main__':
-    app.run('localhost', 3000)

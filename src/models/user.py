@@ -1,6 +1,6 @@
 """Module for User model"""
-from models.base import BaseModel
-from models.database import db
+from .base import BaseModel
+from .database import db
 
 
 class User(BaseModel):

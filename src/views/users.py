@@ -2,10 +2,10 @@
 from flask_jwt_extended import create_access_token
 from flask_restful import Resource, request
 
-from models.user import User
-from utilities.response import success
-from utilities.model_schemas.user_schema import UserSchema
-from utilities.exceptions.ValidationError import ValidationError
+from ..models.user import User
+from ..utilities.response import success
+from ..utilities.model_schemas.user_schema import UserSchema
+from ..utilities.exceptions.ValidationError import ValidationError
 
 
 def authentication(user, message):
