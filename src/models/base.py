@@ -1,5 +1,5 @@
 """Module for base model"""
-from models.database import db
+from .database import db
 
 
 class BaseModel(db.Model):

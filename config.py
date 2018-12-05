@@ -1,13 +1,16 @@
 """Module for application config"""
-import os
+from os import getenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class BaseConfig(object):
     DEBUG = False
     TESTING = False
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+    JWT_SECRET_KEY = getenv('JWT_SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = getenv('DATABASE_URL')
 
 
 class Development(BaseConfig):
@@ -17,6 +20,7 @@ class Development(BaseConfig):
 
 class Test(BaseConfig):
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = getenv('TEST_DATABASE_URI')
 
 
 class Production(BaseConfig):
@@ -28,8 +32,3 @@ config = {
     'test': 'config.Test',
     'production': 'config.Production'
 }
-
-
-def configure_app(app):
-    environment = os.getenv('PYTHON_ENV')
-    app.config.from_object(config[environment])

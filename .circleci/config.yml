@@ -1,23 +1,55 @@
 # Python CircleCI 2.0 configuration file
+version: 2
 python: &python
   docker:
     - image: circleci/python:3.7
       environment:
-        JWT_SECRET_KEY: 938qef923_2#@42#%Tnjd12~!±?2Jfsj53akJKJF14njweJjfiFQs
+        JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
+        TEST_DATABASE_URI: "${TEST_DATABASE_URI}"
 
-version: 2
-
+  working_directory: ~/repo
 jobs:
   build:
     <<: *python
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/repo
       - run:
-          name: Update PATH
-          command: echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
+          name: Install dependencies
+          command: |
+            sudo pip install pipenv
+            pipenv install --dev
       - run:
-          name: Install Pipenv
-          command: pip install --user pipenv
+          name: Set up database
+          command: |
+            source $(python3 -m pipenv --venv)/bin/activate
+            flask db upgrade
       - run:
-          name: Install dependencies and module
-          command: pipenv install --dev
+          name: Download cc-test-reporter
+          command: |
+            mkdir -p tmp/
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/cc-test-reporter
+            chmod +x /tmp/cc-test-reporter
+      - run:
+          name: Run tests and upload coverage
+          command: |
+            source $(python3 -m pipenv --venv)/bin/activate
+            /tmp/cc-test-reporter before-build
+            coverage run -m pytest
+            coverage xml
+            /tmp/cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
+
+            # troubleshooting steps:
+            #   try using --prefix /home/circleci/.local/share/virtualenvs/repo-eQF46Ow3/ in after-build
+            #   try run locally, each of above jobs, setting env variables and executing on terminal until success, then deploy
+
+            # source $(python3 -m pipenv --venv)/bin/activate
+            # coverage run -m pytest
+            # coverage xml
+            # /tmp/cc-test-reporter format-coverage -o ./coverage/coverage.xml -t coverage.py
+            # /tmp/cc-test-reporter upload-coverage -i ./coverage/coverage.xml
+
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
