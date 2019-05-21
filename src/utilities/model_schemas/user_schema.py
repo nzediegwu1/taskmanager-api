@@ -1,5 +1,5 @@
 """Module for user schema"""
-from marshmallow import fields, validate, ValidationError
+from marshmallow import fields, validate
 from .base_schema import BaseSchema
 from ..validators.field_validators import validate_name, validate_password
 

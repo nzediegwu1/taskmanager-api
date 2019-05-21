@@ -8,8 +8,8 @@ class User(BaseModel):
     __tablename__ = 'users'
 
     email = db.Column(db.String(80), unique=True, nullable=False)
-    name = db.Column(db.String(80), unique=False, nullable=False)
-    password = db.Column(db.String(255), unique=False, nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         return f'<User {self.name}'

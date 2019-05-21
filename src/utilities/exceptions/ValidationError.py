@@ -7,16 +7,16 @@ error_blueprint = Blueprint('error', __name__)
 class ValidationError(Exception):
     """Base Validation class for handling validation errors"""
 
-    def __init__(self, message, code=400, error=None):
+    def __init__(self, message, code=400, errors=None):
         Exception.__init__(self)
         self.status_code = code
-        self.error = error
+        self.errors = errors
         self.message = message
 
     def to_dict(self):
-        error = {
+        response = {
             'status': 'error',
             'message': self.message,
-            'errors': self.error
+            'errors': self.errors
         }
-        return {key: value for key, value in error.items() if value}
+        return {key: value for key, value in response.items() if value}

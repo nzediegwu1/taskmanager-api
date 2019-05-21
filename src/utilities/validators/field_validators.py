@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 
 def validate_password(password):
     """Validate password input"""
-    if len(password) < 6:
+    if len(password.strip()) < 6:
         raise ValidationError('Password less than 6 chars')
 
 

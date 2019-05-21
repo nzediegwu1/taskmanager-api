@@ -7,5 +7,4 @@ class Index(Resource):
     """Root endpoint"""
 
     def get(self):
-        message = 'Welcome to Task-Manager api from flask!'
-        return success(message)
+        return success('Welcome to Task-Manager api from flask!')

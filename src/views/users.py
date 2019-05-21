@@ -12,19 +12,17 @@ def authentication(user, message):
     schema = UserSchema(exclude=['password'])
     res, code = success(message, schema.dump(user).data)
     # add token to response
-    res['token'] = create_access_token(user.id)
-    return res, code
+    return {**res, 'token': create_access_token(user.id)}, code
 
 
 class LoginResource(Resource):
     def login(self, data):
-        """
-        Process user login
+        """Process user login
 
-        Parameters:
+        Args:
             data(dict): user login details from schema
         Returns:
-            Response(tuple): success response with status code
+            tuple: success response with status code
         """
         user = User.query.filter_by(email=data['email']).first()
         if not user:
@@ -48,13 +46,12 @@ class UserResource(Resource):
     """Resource to handle users transactions"""
 
     def sign_up(self, data):
-        """
-        Method to process user signup
+        """Process user signup
 
-        Parameters:
+        Args:
             data(dict): new user data from schema
         Returns:
-            Response(tuple): success response with status code
+            tuple: success response with status code
         """
         existing_user = User.query.filter_by(email=data['email']).first()
         if existing_user:
@@ -76,7 +73,7 @@ class UserResource(Resource):
 
     def get(self):
         """
-        Endpoint to retrieve registered users
+        Endpoint to retrieve a registered user
         """
         schema = UserSchema(exclude=['password'], many=True)
         users = User.query.all()
