@@ -6,6 +6,7 @@ python: &python
       environment:
         JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
         TEST_DATABASE_URI: "${TEST_DATABASE_URI}"
+        COVERALLS_REPO_TOKEN: "${COVERALLS_REPO_TOKEN}"
 
   working_directory: ~/repo
 jobs:
@@ -26,30 +27,11 @@ jobs:
             source $(python3 -m pipenv --venv)/bin/activate
             flask db upgrade
       - run:
-          name: Download cc-test-reporter
-          command: |
-            mkdir -p tmp/
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/cc-test-reporter
-            chmod +x /tmp/cc-test-reporter
-      - run:
           name: Run tests and upload coverage
           command: |
             source $(python3 -m pipenv --venv)/bin/activate
-            /tmp/cc-test-reporter before-build
-            coverage run -m pytest
-            coverage xml
-            /tmp/cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
-
-            # troubleshooting steps:
-            #   try using --prefix /home/circleci/.local/share/virtualenvs/repo-eQF46Ow3/ in after-build
-            #   try run locally, each of above jobs, setting env variables and executing on terminal until success, then deploy
-
-            # source $(python3 -m pipenv --venv)/bin/activate
-            # coverage run -m pytest
-            # coverage xml
-            # /tmp/cc-test-reporter format-coverage -o ./coverage/coverage.xml -t coverage.py
-            # /tmp/cc-test-reporter upload-coverage -i ./coverage/coverage.xml
-
+            coverage run --source src -m pytest
+            coveralls
       - store_artifacts:
           path: coverage
           prefix: coverage
