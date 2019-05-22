@@ -70,11 +70,3 @@ class UserResource(Resource):
         schema = UserSchema()
         data = schema.load_data(json_data)
         return self.sign_up(data)
-
-    def get(self):
-        """
-        Endpoint to retrieve a registered user
-        """
-        schema = UserSchema(exclude=['password'], many=True)
-        users = User.query.all()
-        return success('User list', schema.dump(users).data)

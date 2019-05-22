@@ -33,6 +33,13 @@ def handle_exception(error):
     return jsonify(response), error.status_code
 
 
+def initialize_api(app):
+    api = Api(app)
+    api.add_resource(Index, '/')
+    api.add_resource(UserResource, f'{BASE_URL}/users')
+    api.add_resource(LoginResource, f'{BASE_URL}/login')
+
+
 def create_app(config=config[config_name]):
     """Return app object given config object."""
     app = Flask(__name__)
@@ -50,12 +57,9 @@ def create_app(config=config[config_name]):
     # initialize migration scripts
     migrate = Migrate(app, db)
 
+    initialize_api(app)
+
     return app
 
 
 app = create_app()
-api = Api(app)
-
-api.add_resource(Index, '/')
-api.add_resource(UserResource, f'{BASE_URL}/users')
-api.add_resource(LoginResource, f'{BASE_URL}/login')

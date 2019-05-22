@@ -1,7 +1,7 @@
 """Module for parsing custom responses"""
 
 
-def success(message, data, code=200):
+def success(message, data=None, code=200):
     """Return custom success message
 
     Args:
