@@ -7,6 +7,8 @@ from flask_restful import Resource, request
 
 from src.models.user import User
 from src.utilities.response import success
+from src.messages.failure import error_msg
+from src.messages.success import success_msg
 from src.utilities.model_schemas.user_schema import UserSchema
 from src.utilities.exceptions.ValidationError import ValidationError
 
@@ -34,11 +36,11 @@ class LoginResource(Resource):
         """
         user = User.find_one(email=data['email'])
         if not user:
-            raise ValidationError('User not found', 404)
+            raise ValidationError(error_msg['not_found'].format('User'), 404)
         elif user.password != data['password']:
-            raise ValidationError('Invalid login details', 401)
+            raise ValidationError(error_msg['wrong_login'], 401)
 
-        return authentication(user, 'Login successful')
+        return authentication(user, success_msg['login'])
 
     def post(self):
         """
@@ -63,7 +65,7 @@ class UserResource(Resource):
         """
         existing_user = User.find_one(email=data['email'])
         if existing_user:
-            raise ValidationError('User already exists', 409)
+            raise ValidationError(error_msg['exists'].format('User'), 409)
 
         new_user = User(**data)
         new_user.save()
@@ -80,30 +82,37 @@ class UserResource(Resource):
         return self.sign_up(data)
 
 
-def validate_id(func):
-    def wrapper(*args, **kwargs):
-        if not kwargs['user_id'].isdigit():
-            raise ValidationError('id parameter should be a number')
-        user = User.find_one(id=kwargs['user_id'])
-        if not user:
-            raise ValidationError('User does not exist', 404)
-        return func(*args, user=user, user_id=kwargs['user_id'])
-
-    return wrapper
-
-
 def permission(func):
     def wrapper(*args, **kwargs):
-        jwt = decode_token(request.headers['Authorization'][7:])
-        if jwt['identity'] != int(kwargs['user_id']):
-            raise ValidationError('You do not have permission to view', 403)
+        auth = request.headers.get('Authorization')
+        if not auth:
+            raise ValidationError(error_msg['no_token'], 401)
+        jwt = decode_token(request.headers.get('Authorization')[7:])
+        if jwt['identity'] != int(kwargs['id']):
+            raise ValidationError(error_msg['no_permission'], 403)
         return func(*args, **kwargs)
 
     return wrapper
 
 
+def validate_id(model, model_name):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if not kwargs['id'].isdigit():
+                raise ValidationError(error_msg['invalid_id'])
+            instance = model.find_one(id=kwargs['id'])
+            if not instance:
+                raise ValidationError(
+                    error_msg['not_exists'].format(model_name), 404)
+            return func(*args, instance=instance, id=kwargs['id'])
+
+        return wrapper
+
+    return decorator
+
+
 class SingleUserResource(Resource):
-    @validate_id
+    @validate_id(User, 'User')
     @permission
     @jwt_required
     def get(self, **kwargs):
@@ -111,4 +120,5 @@ class SingleUserResource(Resource):
         Endpoint for fetching profile of a logged in user
         """
         schema = UserSchema(exclude=['password'])
-        return success('User profile', data=schema.dump(kwargs['user']).data)
+        return success(success_msg['profile'],
+                       data=schema.dump(kwargs['instance']).data)

@@ -1,14 +1,15 @@
 """Marshmallow field validators"""
 from marshmallow import ValidationError
+from src.messages.failure import error_msg
 
 
 def validate_password(password):
     """Validate password input"""
     if len(password.strip()) < 6:
-        raise ValidationError('Password less than 6 chars')
+        raise ValidationError(error_msg['invalid_password'])
 
 
 def validate_name(name):
     """Validate name field"""
     if not name.replace(' ', '').isalpha():
-        raise ValidationError('Name must be all alpabets')
+        raise ValidationError(error_msg['invalid_name'])

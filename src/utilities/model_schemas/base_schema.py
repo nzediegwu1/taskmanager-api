@@ -1,6 +1,7 @@
 """Base schema module"""
 from marshmallow import Schema
-from ..exceptions.ValidationError import ValidationError
+from src.utilities.exceptions.ValidationError import ValidationError
+from src.messages.failure import error_msg
 
 
 class BaseSchema(Schema):
@@ -9,5 +10,5 @@ class BaseSchema(Schema):
     def load_data(self, data):
         data, errors = self.load(data)
         if errors:
-            raise ValidationError('Field validation(s) faild', 400, errors)
+            raise ValidationError(error_msg['validation'], 400, errors)
         return data

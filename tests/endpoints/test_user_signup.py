@@ -1,6 +1,8 @@
 from flask import json
 from src.models.user import User
-from src.messages.success import success_messages
+from src.messages.success import success_msg
+from src.messages.failure import error_msg
+from tests.mocks import mocks
 
 BASE_URL = '/api/v1'
 CHARSET = 'utf-8'
@@ -12,17 +14,13 @@ class TestUserOnboarding:
             init_db,
             client,
     ):
-        data = {
-            'email': 'okoro@gmail.com',
-            'name': 'Okoro Okafor',
-            'password': 'password1'
-        }
+        data = mocks['valid_user']
         response = client.post(f'{BASE_URL}/users', data=json.dumps(data))
-        parsed_response = json.loads(response.data.decode(CHARSET))
+        json_response = json.loads(response.data.decode(CHARSET))
         assert response.status_code == 200
-        assert parsed_response['message'] == success_messages['signup']
-        assert parsed_response['token']
-        assert parsed_response['data']['email'] == data['email']
+        assert json_response['message'] == success_msg['signup']
+        assert json_response['token']
+        assert json_response['data']['email'] == data['email']
 
     def test_user_signup_fails_with_existing_user(self, client, new_user):
         new_user.save()
@@ -32,24 +30,27 @@ class TestUserOnboarding:
             'password': new_user.password
         }
         response = client.post(f'{BASE_URL}/users', data=json.dumps(data))
-        parsed_response = json.loads(response.data.decode(CHARSET))
+        json_response = json.loads(response.data.decode(CHARSET))
         assert response.status_code == 409
-        assert parsed_response['message'] == 'User already exists'
-        assert parsed_response.get('token') is None
+        assert json_response['message'] == error_msg['exists'].format('User')
+        assert json_response.get('token') is None
 
     def test_user_signup_fails_with_invalid_data(
             self,
             client,
     ):
-        data = {'email': '54and&gmail.com', 'password': 'short'}
+        data = {
+            'email': '54and&gmail.com',
+            'password': 'short',
+            'name': 'ana 4 &9'
+        }
         response = client.post(f'{BASE_URL}/users', data=json.dumps(data))
-        parsed_response = json.loads(response.data.decode(CHARSET))
+        json_response = json.loads(response.data.decode(CHARSET))
         assert response.status_code == 400
-        assert parsed_response['message'] == 'Field validation(s) faild'
-        assert type(parsed_response['errors']) == dict
-        assert parsed_response['errors']['email'] == [
-            'Not a valid email address.'
+        assert json_response['message'] == error_msg['validation']
+        assert type(json_response['errors']) == dict
+        assert json_response['errors']['email'] == [error_msg['invalid_email']]
+        assert json_response['errors']['password'] == [
+            error_msg['invalid_password']
         ]
-        assert parsed_response['errors']['password'] == [
-            'Password less than 6 chars'
-        ]
+        assert json_response['errors']['name'] == [error_msg['invalid_name']]

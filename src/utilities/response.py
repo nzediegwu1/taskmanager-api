@@ -13,3 +13,7 @@ def success(message, data=None, code=200):
     """
     response = {'status': 'success', 'data': data, 'message': message}
     return {key: value for key, value in response.items() if value}, code
+
+
+def failure(message):
+    return {'status': 'error', 'message': message}
