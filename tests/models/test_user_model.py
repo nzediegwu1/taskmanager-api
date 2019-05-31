@@ -13,5 +13,5 @@ class TestUserModel:
 
     def test_user_model_get_succeeds(self):
         name = 'Anaeze Nsoffor'
-        user = User.query.filter_by(name=name).first()
+        user = User.find_one(name=name)
         assert user.name == name

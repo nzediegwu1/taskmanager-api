@@ -10,3 +10,7 @@ class BaseModel(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    @classmethod
+    def find_one(cls, **kwargs):
+        return cls.query.filter_by(**kwargs).first()
