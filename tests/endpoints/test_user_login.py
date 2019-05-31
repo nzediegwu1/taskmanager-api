@@ -1,5 +1,6 @@
 from flask import json
 from src.models.user import User
+from src.messages.success import success_messages
 
 BASE_URL = '/api/v1'
 CHARSET = 'utf-8'
@@ -25,7 +26,7 @@ class TestUserOnboarding:
         response = client.post(f'{BASE_URL}/login', data=json.dumps(data))
         parsed_response = json.loads(response.data.decode(CHARSET))
         assert response.status_code == 200
-        assert parsed_response['message'] == 'Login successful'
+        assert parsed_response['message'] == success_messages['login']
         assert parsed_response['token']
         assert parsed_response['data']['email'] == data['email']
 
